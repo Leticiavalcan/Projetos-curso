@@ -1,0 +1,32 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: 0;
+}
+
+body{
+    background: #FAFAFA;
+    width: 100vh;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.celular-ilustrativo{
+    width: 450px;
+
+}
+
+.container-itens{
+    width: 350px;
+    
+}
+
+.container-form{
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #dbdbdb;
+    background: #ffffff;
+    padding: 50px;
+}
