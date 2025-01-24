@@ -1,0 +1,84 @@
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pandas as pd
+
+#Lembrem-se sempre de alterar a importação dos dados de acordo com o diretório de vocês.
+df = pd.read_csv("/content/CHURN_TELECON_MOD08_TAREFA (1).csv", delimiter=';')
+
+df.head(10)
+
+# 1 - Carregue a base, verifique se os tipos de dados estão de acordo com cada coluna e caso não estejam realize a transformação dos tipos de dados.
+
+#verificar os tipos de dados
+print(df.dtypes)
+
+# 2 - Esse exercício faremos por etapas:
+#A) Verifique se temos colunas com dados faltantes e traga a % dos dados faltantes por coluna.
+
+# Calcular a porcentagem de dados faltantes por coluna
+missing_data = df.isnull().mean() * 100
+
+# Mostrar as colunas com dados faltantes e suas porcentagens
+print(missing_data[missing_data > 0])
+
+#B) Exclua nessa etapa as linhas das colunas com dados faltantes que você analisar que esse método é o ideal. Justifique o motivo de estar excluindo essas linhas.
+
+# Decidindo excluir colunas com mais de 30% de dados faltantes
+colunas_excluidas = missing_data[missing_data > 30].index
+
+# Excluindo as colunas com mais de 30% de dados faltantes
+df = df.drop(columns=colunas_excluidas)
+
+# Excluindo as linhas com dados faltantes (somente se o percentual de dados faltantes for baixo)
+df = df.dropna()
+
+# Exibindo o DataFrame limpo
+print(df)
+
+#Média (para dados numéricos simétricos e sem outliers): Quando a distribuição dos dados não tem uma assimetria significativa e não há outliers que distorçam a análise, a média é uma boa escolha.
+
+#Mediana (para dados numéricos com outliers ou assimétricos): A mediana é mais robusta a valores extremos (outliers) e, portanto, é preferível quando os dados não seguem uma distribuição normal ou quando há dados muito discrepantes
+
+#Moda (para dados categóricos): Para colunas com dados categóricos, a moda é o melhor método, pois substitui os valores ausentes pela categoria mais frequente, mantendo a integridade da distribuição original da coluna.
+
+#Para colunas categóricas (Genero, Churn, PhoneService): A imputação é feita com moda se a quantidade de dados faltantes for pequena. Se a coluna tiver mais de 30% de dados faltantes, a exclusão é sugerida. Para colunas numéricas (Pagamento_Mensal): A decisão de usar média ou mediana depende da análise de outliers (com base no desvio padrão e média). Quando a coluna tem menos de 30% de dados faltantes, usamos a média, a menos que detectemos uma grande presença de outliers, nesse caso, a mediana é preferida. Isso ajudará a fazer imputações de maneira informada, com base na análise do comportamento dos dados e na quantidade de dados faltantes.
+
+#C) Nessa etapa substitua pela média, mediana ou moda as linhas das colunas com valores faltantes que você analisou e entendeu que esse era o melhor método. Não se esqueça de justificar sua escolha.
+
+# Substituir valores faltantes com base na análise (exemplo: média, mediana ou moda)
+for col in df.columns:
+    if df[col].isnull().sum() > 0:  # Só processa colunas com valores faltantes
+        if df[col].dtype == 'object':  # Coluna categórica
+            if missing_data[col] < 1:  # Caso a porcentagem de dados faltantes seja baixa
+                # Substituindo valores faltantes pela moda para dados categóricos
+                df[col].fillna(df[col].mode()[0], inplace=True)
+                print(f"Substituindo valores faltantes em '{col}' pela moda (valor mais frequente).")
+            else:
+                print(f"Considerando a exclusão de '{col}' devido a muitos dados faltantes.")
+        else:  # Coluna numérica
+            if missing_data[col] > 30:
+                # Caso a coluna tenha mais de 30% de dados faltantes, é melhor avaliar se a coluna deve ser excluída
+                print(f"A coluna '{col}' tem muitos dados faltantes, considere outras abordagens.")
+            else:
+                # Imputação pela média ou mediana dependendo da distribuição
+                if col == 'Pagamento_Mensal':  # Exemplo: analisando pagamento mensal
+                    if df[col].std() > df[col].mean():  # Se houver muitos outliers, use a mediana
+                        df[col].fillna(df[col].median(), inplace=True)
+                        print(f"Substituindo valores faltantes em '{col}' pela mediana.")
+                    else:
+                        df[col].fillna(df[col].mean(), inplace=True)
+                        print(f"Substituindo valores faltantes em '{col}' pela média.")
+                else:
+                    # Para outras colunas numéricas com dados faltantes em menor proporção, usamos a média
+                    df[col].fillna(df[col].mean(), inplace=True)
+                    print(f"Substituindo valores faltantes em '{col}' pela média.")
+
+# 3 - Verifique se encontramos valores digitados incorretamente, ou com letras maiusculas ou minusculas, ou até mesmo mesmos valores porém escritos de forma dirente e corrija.
+
+#Para isso usamos a função rename
+df.rename(columns={'PhoneService': 'servico_telefonico'}, inplace=True)
+df.rename(columns={'PaymentMethod': 'metodo_pagamento'}, inplace=True)
+df.head() #ver se alterou
+
+
+
